@@ -81,6 +81,8 @@ public class E2EEManager: NSObject, @unchecked Sendable, ObservableObject, Logga
         var frameCryptors = [CryptorKey: LKRTCFrameCryptor]()
         var trackPublications = [LKRTCFrameCryptor: TrackPublication]()
         var dataCryptor: LKRTCDataPacketCryptor?
+        /// honeycomb: the key index this phone's frames carry (D82, hive-node 6.7.5)
+        var honeycombLocalKeyIndex: Int32 = 0
     }
 
     typealias CryptorKey = [Participant.Identity: Track.Sid]
@@ -206,7 +208,23 @@ public class E2EEManager: NSObject, @unchecked Sendable, ObservableObject, Logga
             _state.mutate {
                 $0.frameCryptors[[participantIdentity: publication.sid]] = frameCryptor
                 $0.trackPublications[frameCryptor] = publication
+                frameCryptor.keyIndex = $0.honeycombLocalKeyIndex // honeycomb (D82)
                 frameCryptor.enabled = $0.enabled
+            }
+        }
+    }
+
+    /// honeycomb: the key index every frame this phone sends carries from now on, for its
+    /// published tracks and those published later. A group call's sender switches to
+    /// `epoch mod 16` a second after sending its new key (hive-node 6.7.5, honeycomb-ios D82).
+    /// LiveKit's key provider sets keys per index but leaves the sender's index at 0.
+    public func honeycombSetLocalKeyIndex(_ index: Int32) async {
+        await RTC.run {
+            _state.mutate {
+                $0.honeycombLocalKeyIndex = index
+                for (frameCryptor, publication) in $0.trackPublications where publication is LocalTrackPublication {
+                    frameCryptor.keyIndex = index
+                }
             }
         }
     }
