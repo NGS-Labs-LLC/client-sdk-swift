@@ -144,8 +144,12 @@ public final class BaseKeyProvider: NSObject, Loggable, Sendable {
                                                       failureTolerance: options.failureTolerance,
                                                       keyRingSize: options.keyRingSize,
                                                       discardFrameWhenCryptorNotReady: options.discardFrameWhenCryptorNotReady,
-                                                      keyDerivationAlgorithm: options.keyDerivationAlgorithm.toRTCType())
+                                                      keyDerivationAlgorithm: options.keyDerivationAlgorithm.toRTCType(),
+                                                      keySize: BaseKeyProvider.honeycombKeySize) // honeycomb: hive-frame/2 (D82)
     }
+
+    /// Honeycomb marker (D82): this build's per-participant frame keys are AES-256.
+    public static let honeycombKeySize: Int32 = 256
 
     // MARK: - Key management
 

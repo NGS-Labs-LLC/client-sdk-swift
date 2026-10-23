@@ -19,7 +19,7 @@ let package = Package(
     ],
     dependencies: [
         // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/livekit/webrtc-xcframework.git", exact: "150.7871.03"),
+        .package(url: "https://github.com/NGS-Labs-LLC/honeycomb-webrtc.git", exact: "150.7871.4-hc.1"), // honeycomb (D82)
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.1.9"),
         // Test-only: conformance oracle for the nanopb facades.
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
@@ -48,7 +48,7 @@ let package = Package(
         .target(
             name: "LiveKit",
             dependencies: [
-                .product(name: "LiveKitWebRTC", package: "webrtc-xcframework"),
+                .product(name: "LiveKitWebRTC", package: "honeycomb-webrtc"),
                 .product(name: "LiveKitUniFFI", package: "livekit-uniffi-xcframework"),
                 "LiveKitNanopb",
                 "CLiveKitProto",
