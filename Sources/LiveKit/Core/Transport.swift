@@ -231,7 +231,10 @@ final class Transport: NSObject, Loggable {
         try await set(remoteDescription: sd)
     }
 
-    func set(remoteDescription sd: LKRTCSessionDescription) async throws {
+    func set(remoteDescription original: LKRTCSessionDescription) async throws {
+        // honeycomb: the audio-level header extensions are never negotiated (D82, hive-node 6.6)
+        let stripped = Self.honeycombStripAudioLevel(original.sdp)
+        let sd = stripped == original.sdp ? original : RTC.createSessionDescription(type: original.type, sdp: stripped)
         try await applyPendingInitialOffer()
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -339,6 +342,29 @@ final class Transport: NSObject, Loggable {
 // MARK: - SDP Munging
 
 extension Transport {
+    /// honeycomb: removes the RTP audio-level header extensions (RFC 6464
+    /// `ssrc-audio-level`, RFC 6465 `csrc-audio-level`) from a remote description.
+    /// They sit outside the frame encryption and would tell the SFU who speaks
+    /// when; without them in the remote offer or answer they are never negotiated,
+    /// so never sent (hive-node wire protocol 6.6, honeycomb-ios D82).
+    nonisolated static let honeycombAudioLevelURIs = [
+        "urn:ietf:params:rtp-hdrext:ssrc-audio-level",
+        "urn:ietf:params:rtp-hdrext:csrc-audio-level",
+    ]
+
+    nonisolated static func honeycombStripAudioLevel(_ sdp: String) -> String {
+        var document = SDP(parsing: sdp)
+        var modified = false
+        for index in document.mediaSections.indices {
+            let before = document.mediaSections[index].lines.count
+            document.mediaSections[index].lines.removeAll { line in
+                line.hasPrefix("a=extmap:") && honeycombAudioLevelURIs.contains { line.contains($0) }
+            }
+            modified = modified || document.mediaSections[index].lines.count != before
+        }
+        return modified ? document.write() : sdp
+    }
+
     /// Munge SDP to change `a=inactive` to `a=recvonly` for RTP media m-lines in single PC mode.
     /// WebRTC can generate inactive direction even when transceivers were configured as recvonly.
     /// Only rewrites RTP m-sections — non-RTP sections (e.g. data channel `m=application`) are preserved.
