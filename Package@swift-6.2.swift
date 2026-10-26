@@ -20,7 +20,7 @@ let package = Package(
     ],
     dependencies: [
         // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/NGS-Labs-LLC/honeycomb-webrtc.git", exact: "150.7871.4-hc.2"), // honeycomb (D82; hc.2 adds Mac Catalyst)
+        .package(url: "https://github.com/NGS-Labs-LLC/honeycomb-webrtc.git", exact: "150.7871.4-hc.2"), // honeycomb (D82; hc.2 adds Mac Catalyst, and x86_64 to the simulator and Catalyst)
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.1.9"),
         // Test-only: conformance oracle for the nanopb facades.
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
