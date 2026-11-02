@@ -128,7 +128,8 @@ public final class BaseKeyProvider: NSObject, Loggable, Sendable {
                                                       failureTolerance: options.failureTolerance,
                                                       keyRingSize: options.keyRingSize,
                                                       discardFrameWhenCryptorNotReady: options.discardFrameWhenCryptorNotReady,
-                                                      keyDerivationAlgorithm: options.keyDerivationAlgorithm.toRTCType())
+                                                      keyDerivationAlgorithm: options.keyDerivationAlgorithm.toRTCType(),
+                                                      keySize: BaseKeyProvider.honeycombKeySize) // honeycomb: never 128-bit (D82, SEC WEBRTC-08)
         if isSharedKey, sharedKey != nil {
             let keyData = sharedKey!.data(using: .utf8)!
             rtcKeyProvider.setSharedKey(keyData, with: 0)
@@ -148,7 +149,8 @@ public final class BaseKeyProvider: NSObject, Loggable, Sendable {
                                                       keySize: BaseKeyProvider.honeycombKeySize) // honeycomb: hive-frame/2 (D82)
     }
 
-    /// Honeycomb marker (D82): this build's per-participant frame keys are AES-256.
+    /// Honeycomb marker (D82): this build's frame keys are AES-256. Every initialiser passes it,
+    /// so no provider of this class derives a 128-bit key.
     public static let honeycombKeySize: Int32 = 256
 
     // MARK: - Key management
