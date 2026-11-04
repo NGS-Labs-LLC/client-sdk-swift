@@ -20,7 +20,7 @@ let package = Package(
     ],
     dependencies: [
         // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/NGS-Labs-LLC/honeycomb-webrtc.git", exact: "150.7871.4-hc.3"), // honeycomb (D82; hc.3 is build-3: the frame replay check and the native audio-level strip)
+        .package(url: "https://github.com/NGS-Labs-LLC/honeycomb-webrtc.git", exact: "150.7871.4-hc.4"), // honeycomb (D82; hc.4 is build-4: the frame replay check, never reset while the key lives (D-086), the native audio-level strip, and the decrypted key index for the one-to-one re-key)
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.1.9"),
         // Test-only: conformance oracle for the nanopb facades.
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
